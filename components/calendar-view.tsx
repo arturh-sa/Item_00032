@@ -1,11 +1,11 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback, useMemo } from "react"
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, addMonths, subMonths, parse } from "date-fns"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { ChevronLeft, ChevronRight } from "lucide-react"
+import { ChevronLeft, ChevronRight, Code, Users, CheckCircle, Phone } from "lucide-react"
 import {
   Dialog,
   DialogContent,
@@ -15,71 +15,84 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 import { useSearchParams } from "next/navigation"
+import { statusVariantMap } from "@/lib/utils"
+import { upcomingInterviews } from "@/components/upcoming-interviews"
 
-// Mock data for demonstration
-const events = [
-  {
-    id: "1",
-    title: "Phone Screen - TechCorp",
-    date: "2023-11-15",
-    type: "interview",
-  },
-  {
-    id: "2",
-    title: "Technical Interview - InnovateSoft",
-    date: "2023-11-17",
-    type: "interview",
-  },
-  {
-    id: "3",
-    title: "Follow-up Deadline - WebSolutions",
-    date: "2023-11-20",
-    type: "deadline",
-  },
-  {
-    id: "4",
-    title: "Application Deadline - Acme Inc",
-    date: "2023-11-25",
-    type: "deadline",
-  },
-  {
-    id: "5",
-    title: "Final Interview - Massive Dynamic",
-    date: "2023-11-28",
-    type: "interview",
-  },
-]
+// Convert the shared interview data to calendar events
+const events = upcomingInterviews.map((interview) => ({
+  id: interview.id,
+  title: `${interview.type} - ${interview.company}`,
+  date: interview.date,
+  type: interview.type,
+  company: interview.company,
+  position: interview.position,
+  time: interview.time,
+  status: interview.status,
+  location: interview.location,
+  interviewer: interview.interviewer,
+  description: interview.description,
+}))
+
+// Add application deadlines for completeness
+events.push({
+  id: "app-1",
+  title: "Application Deadline - Acme Inc",
+  date: "2023-11-25",
+  type: "Applied",
+  company: "Acme Inc",
+  position: "Senior Developer",
+})
 
 export function CalendarView() {
   const [currentDate, setCurrentDate] = useState(new Date())
   const [selectedDate, setSelectedDate] = useState<Date | null>(null)
   const [selectedEvents, setSelectedEvents] = useState<any[]>([])
+  const [initialDateProcessed, setInitialDateProcessed] = useState(false)
+  const [isMobile, setIsMobile] = useState(false)
+
+  // Check for mobile screen size
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768)
+    }
+
+    checkMobile()
+    window.addEventListener("resize", checkMobile)
+
+    return () => {
+      window.removeEventListener("resize", checkMobile)
+    }
+  }, [])
 
   // Get the date from URL query parameters
   const searchParams = useSearchParams()
 
   // Set the current date based on the URL parameter when component mounts
   useEffect(() => {
-    const dateParam = searchParams?.get("date")
-    if (dateParam) {
-      try {
-        // Parse the date parameter (assuming format YYYY-MM-DD)
-        const parsedDate = parse(dateParam, "yyyy-MM-dd", new Date())
+    // Only process the date parameter once to avoid infinite loops
+    if (!initialDateProcessed) {
+      const dateParam = searchParams?.get("date")
+      if (dateParam) {
+        try {
+          // Parse the date parameter (assuming format YYYY-MM-DD)
+          const parsedDate = parse(dateParam, "yyyy-MM-dd", new Date())
 
-        // Check if the parsed date is valid
-        if (!isNaN(parsedDate.getTime())) {
-          setCurrentDate(parsedDate)
-          setSelectedDate(parsedDate)
+          // Check if the parsed date is valid
+          if (!isNaN(parsedDate.getTime())) {
+            setCurrentDate(parsedDate)
+            setSelectedDate(parsedDate)
 
-          // Find events for this date
-          const dayEvents = events.filter((event) => isSameDay(new Date(event.date), parsedDate))
-          setSelectedEvents(dayEvents)
+            // Find events for this date
+            const dayEvents = events.filter((event) => isSameDay(new Date(event.date), parsedDate))
+            setSelectedEvents(dayEvents)
+          }
+        } catch (error) {
+          console.error("Error parsing date parameter:", error)
         }
-      } catch (error) {
-        console.error("Error parsing date parameter:", error)
       }
+      setInitialDateProcessed(true)
     }
-  }, [searchParams])
+  }, [searchParams, initialDateProcessed])
 
   const monthStart = startOfMonth(currentDate)
   const monthEnd = endOfMonth(currentDate)
@@ -93,14 +106,37 @@ export function CalendarView() {
     setCurrentDate(addMonths(currentDate, 1))
   }
 
-  const handleDateClick = (day: Date) => {
+  // Memoize the handleDateClick function to prevent unnecessary re-renders
+  const handleDateClick = useCallback((day: Date) => {
     setSelectedDate(day)
     const dayEvents = events.filter((event) => isSameDay(new Date(event.date), day))
     setSelectedEvents(dayEvents)
-  }
+  }, [])
 
-  const getEventsForDate = (date: Date) => {
+  // Memoize the getEventsForDate function to prevent unnecessary re-renders
+  const getEventsForDate = useCallback((date: Date) => {
     return events.filter((event) => isSameDay(new Date(event.date), date))
+  }, [])
+
+  // Memoize the days of the week to prevent unnecessary re-renders
+  const daysOfWeek = useMemo(() => {
+    return isMobile ? ["S", "M", "T", "W", "T", "F", "S"] : ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
+  }, [isMobile])
+
+  // Function to get the appropriate icon for event type
+  const getEventTypeIcon = (type: string) => {
+    switch (type) {
+      case "Technical":
+        return <Code className="mr-1 h-3 w-3" />
+      case "HR":
+        return <Users className="mr-1 h-3 w-3" />
+      case "Final":
+        return <CheckCircle className="mr-1 h-3 w-3" />
+      case "Phone Screen":
+        return <Phone className="mr-1 h-3 w-3" />
+      default:
+        return null
+    }
   }
 
   return (
@@ -118,17 +154,15 @@ export function CalendarView() {
       </CardHeader>
       <CardContent>
         <div className="grid grid-cols-7 gap-1 text-center font-medium">
-          <div className="p-2">Sun</div>
-          <div className="p-2">Mon</div>
-          <div className="p-2">Tue</div>
-          <div className="p-2">Wed</div>
-          <div className="p-2">Thu</div>
-          <div className="p-2">Fri</div>
-          <div className="p-2">Sat</div>
+          {daysOfWeek.map((day, index) => (
+            <div key={index} className="p-2">
+              {day}
+            </div>
+          ))}
         </div>
         <div className="grid grid-cols-7 gap-1">
           {Array.from({ length: new Date(monthStart).getDay() }).map((_, index) => (
-            <div key={`empty-${index}`} className="p-2 h-24 border rounded-md bg-muted/20"></div>
+            <div key={`empty-${index}`} className="p-2 h-16 md:h-24 border rounded-md bg-muted/20"></div>
           ))}
           {monthDays.map((day) => {
             const dayEvents = getEventsForDate(day)
@@ -139,7 +173,7 @@ export function CalendarView() {
               <Dialog key={day.toString()}>
                 <DialogTrigger asChild>
                   <div
-                    className={`p-2 h-24 border rounded-md cursor-pointer hover:bg-muted/50 transition-colors ${
+                    className={`p-2 h-16 md:h-24 border rounded-md cursor-pointer hover:bg-muted/50 transition-colors ${
                       isSameDay(day, new Date()) ? "bg-primary/10 border-primary" : ""
                     } ${isSelected ? "ring-2 ring-primary" : ""}`}
                     onClick={() => handleDateClick(day)}
@@ -147,26 +181,31 @@ export function CalendarView() {
                     <div className="font-medium">{format(day, "d")}</div>
                     {hasEvents && (
                       <div className="mt-1 space-y-1">
-                        {dayEvents.slice(0, 2).map((event) => (
-                          <div
-                            key={event.id}
-                            className={`text-xs truncate rounded px-1 py-0.5 ${
-                              event.type === "interview"
-                                ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300"
-                                : "bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-300"
-                            }`}
-                          >
-                            {event.title}
+                        {dayEvents.slice(0, isMobile ? 1 : 2).map((event) => {
+                          // Get the correct variant for this event type
+                          const variant = statusVariantMap[event.type]?.toLowerCase() || "default"
+
+                          return (
+                            <Badge
+                              key={event.id}
+                              variant={variant as any}
+                              className="flex items-center text-xs w-full justify-center"
+                            >
+                              {getEventTypeIcon(event.type)}
+                              {isMobile ? event.type : event.type + " - " + event.company}
+                            </Badge>
+                          )
+                        })}
+                        {dayEvents.length > (isMobile ? 1 : 2) && (
+                          <div className="text-xs text-muted-foreground">
+                            +{dayEvents.length - (isMobile ? 1 : 2)} more
                           </div>
-                        ))}
-                        {dayEvents.length > 2 && (
-                          <div className="text-xs text-muted-foreground">+{dayEvents.length - 2} more</div>
                         )}
                       </div>
                     )}
                   </div>
                 </DialogTrigger>
-                <DialogContent>
+                <DialogContent className="sm:max-w-[500px]">
                   <DialogHeader>
                     <DialogTitle>{format(day, "EEEE, MMMM d, yyyy")}</DialogTitle>
                     <DialogDescription>Events for this day</DialogDescription>
@@ -176,9 +215,17 @@ export function CalendarView() {
                       dayEvents.map((event) => (
                         <div key={event.id} className="flex items-center justify-between border-b pb-2">
                           <div>
-                            <p className="font-medium">{event.title}</p>
+                            <p className="font-medium">{event.company}</p>
+                            <p className="text-sm text-muted-foreground">{event.position}</p>
+                            {event.time && <p className="text-xs text-muted-foreground mt-1">Time: {event.time}</p>}
                           </div>
-                          <Badge variant="outline">{event.type === "interview" ? "Interview" : "Deadline"}</Badge>
+                          <Badge
+                            variant={statusVariantMap[event.type]?.toLowerCase() as any}
+                            className="flex items-center"
+                          >
+                            {getEventTypeIcon(event.type)}
+                            {event.type}
+                          </Badge>
                         </div>
                       ))
                     ) : (

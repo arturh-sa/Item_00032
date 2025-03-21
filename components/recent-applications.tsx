@@ -12,6 +12,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog"
 import Link from "next/link"
+import { statusVariantMap } from "@/lib/utils"
 
 export function RecentApplications() {
   const applications = [
@@ -73,7 +74,9 @@ export function RecentApplications() {
                       <span className="text-xs text-muted-foreground">{application.date}</span>
                     </div>
                   </div>
-                  <Badge variant="outline">{application.status}</Badge>
+                  <Badge variant={(statusVariantMap[application.status] as any) || "default"}>
+                    {application.status}
+                  </Badge>
                 </div>
               </DialogTrigger>
               <DialogContent className="sm:max-w-[500px]">

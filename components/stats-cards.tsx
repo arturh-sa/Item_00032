@@ -3,7 +3,18 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Briefcase, Calendar, Clock, CheckCircle2, ArrowUpRight, Download } from "lucide-react"
+import {
+  Briefcase,
+  Calendar,
+  Clock,
+  CheckCircle2,
+  ArrowUpRight,
+  Download,
+  Code,
+  Users,
+  CheckCircle,
+  Phone,
+} from "lucide-react"
 import {
   Dialog,
   DialogContent,
@@ -15,6 +26,8 @@ import {
 } from "@/components/ui/dialog"
 import Link from "next/link"
 import { ScrollArea } from "@/components/ui/scroll-area"
+import { statusVariantMap } from "@/lib/utils"
+import { upcomingInterviews } from "@/components/upcoming-interviews"
 
 // Mock data for demonstration
 const allApplications = [
@@ -72,63 +85,8 @@ const activeApplications = allApplications.filter((app) =>
   ["Applied", "Phone Screen", "Interview"].includes(app.status),
 )
 
-const interviews = [
-  {
-    id: "1",
-    company: "TechCorp",
-    position: "Frontend Developer",
-    date: "2023-11-15",
-    time: "10:00 AM",
-    type: "Technical",
-    status: "Upcoming",
-  },
-  {
-    id: "2",
-    company: "InnovateSoft",
-    position: "React Developer",
-    date: "2023-11-17",
-    time: "2:30 PM",
-    type: "HR",
-    status: "Upcoming",
-  },
-  {
-    id: "3",
-    company: "Massive Dynamic",
-    position: "Full Stack Developer",
-    date: "2023-11-01",
-    time: "11:00 AM",
-    type: "Technical",
-    status: "Completed",
-  },
-  {
-    id: "4",
-    company: "Initech",
-    position: "UI/UX Developer",
-    date: "2023-10-30",
-    time: "3:00 PM",
-    type: "Phone Screen",
-    status: "Completed",
-  },
-  {
-    id: "5",
-    company: "WebSolutions",
-    position: "UI Engineer",
-    date: "2023-11-20",
-    time: "11:15 AM",
-    type: "Final",
-    status: "Upcoming",
-  },
-]
-
-const statusColorMap: Record<string, string> = {
-  Applied: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300",
-  "Phone Screen": "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300",
-  Interview: "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300",
-  Offer: "bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-300",
-  Rejected: "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300",
-  Upcoming: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300",
-  Completed: "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300",
-}
+// Use the shared interview data
+const interviews = upcomingInterviews
 
 // Function to export data as CSV
 const exportToCSV = (data: any[], filename: string) => {
@@ -167,6 +125,22 @@ const exportToCSV = (data: any[], filename: string) => {
   document.body.removeChild(link)
 }
 
+// Function to get the appropriate icon for interview type
+const getInterviewTypeIcon = (type: string) => {
+  switch (type) {
+    case "Technical":
+      return <Code className="mr-1 h-3 w-3" />
+    case "HR":
+      return <Users className="mr-1 h-3 w-3" />
+    case "Final":
+      return <CheckCircle className="mr-1 h-3 w-3" />
+    case "Phone Screen":
+      return <Phone className="mr-1 h-3 w-3" />
+    default:
+      return null
+  }
+}
+
 export function StatsCards() {
   return (
     <>
@@ -201,7 +175,7 @@ export function StatsCards() {
                     </div>
                   </div>
                   <div className="flex items-center gap-3">
-                    <Badge className={statusColorMap[app.status]}>{app.status}</Badge>
+                    <Badge variant={statusVariantMap[app.status]?.toLowerCase() as any}>{app.status}</Badge>
                     <Button variant="ghost" size="icon" asChild>
                       <Link href={`/applications/${app.id}`}>
                         <ArrowUpRight className="h-4 w-4" />
@@ -251,7 +225,7 @@ export function StatsCards() {
                     </div>
                   </div>
                   <div className="flex items-center gap-3">
-                    <Badge className={statusColorMap[app.status]}>{app.status}</Badge>
+                    <Badge variant={statusVariantMap[app.status]?.toLowerCase() as any}>{app.status}</Badge>
                     <Button variant="ghost" size="icon" asChild>
                       <Link href={`/applications/${app.id}`}>
                         <ArrowUpRight className="h-4 w-4" />
@@ -316,7 +290,19 @@ export function StatsCards() {
                           </div>
                         </div>
                         <div className="flex items-center gap-3">
-                          <Badge className={statusColorMap[interview.type]}>{interview.type}</Badge>
+                          <Badge
+                            variant={statusVariantMap[interview.type]?.toLowerCase() as any}
+                            className="flex items-center"
+                          >
+                            {getInterviewTypeIcon(interview.type)}
+                            {interview.type}
+                          </Badge>
+                          <Button variant="outline" size="sm" asChild>
+                            <Link href={`/calendar?date=${interview.date}`}>
+                              <Calendar className="mr-1 h-3 w-3" />
+                              View in Calendar
+                            </Link>
+                          </Button>
                         </div>
                       </div>
                     ))}
@@ -342,7 +328,19 @@ export function StatsCards() {
                           </div>
                         </div>
                         <div className="flex items-center gap-3">
-                          <Badge className={statusColorMap[interview.type]}>{interview.type}</Badge>
+                          <Badge
+                            variant={statusVariantMap[interview.type]?.toLowerCase() as any}
+                            className="flex items-center"
+                          >
+                            {getInterviewTypeIcon(interview.type)}
+                            {interview.type}
+                          </Badge>
+                          <Button variant="outline" size="sm" asChild>
+                            <Link href={`/calendar?date=${interview.date}`}>
+                              <Calendar className="mr-1 h-3 w-3" />
+                              View in Calendar
+                            </Link>
+                          </Button>
                         </div>
                       </div>
                     ))}
@@ -350,11 +348,6 @@ export function StatsCards() {
               </ScrollArea>
             </div>
           </div>
-          <DialogFooter>
-            <Button asChild>
-              <Link href="/calendar">View Calendar</Link>
-            </Button>
-          </DialogFooter>
         </DialogContent>
       </Dialog>
 

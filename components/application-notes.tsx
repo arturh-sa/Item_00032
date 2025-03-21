@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Plus } from "lucide-react"
 import { ApplicationNote } from "@/components/application-note"
 import { ApplicationNoteForm } from "@/components/application-note-form"
+import { useToast } from "@/components/ui/use-toast"
 
 interface ApplicationNotesProps {
   applicationId: string
@@ -32,6 +33,7 @@ const initialNotes = [
 export function ApplicationNotes({ applicationId }: ApplicationNotesProps) {
   const [notes, setNotes] = useState(initialNotes)
   const [showForm, setShowForm] = useState(false)
+  const { toast } = useToast()
 
   const addNote = (note: any) => {
     const newNote = {
@@ -41,10 +43,39 @@ export function ApplicationNotes({ applicationId }: ApplicationNotesProps) {
     }
     setNotes([...notes, newNote])
     setShowForm(false)
+
+    toast({
+      title: "Note added",
+      description: "Your note has been successfully added.",
+    })
+  }
+
+  const editNote = (id: string, updatedNote: { title: string; content: string }) => {
+    setNotes(
+      notes.map((note) =>
+        note.id === id
+          ? {
+              ...note,
+              title: updatedNote.title,
+              content: updatedNote.content,
+            }
+          : note,
+      ),
+    )
+
+    toast({
+      title: "Note updated",
+      description: "Your note has been successfully updated.",
+    })
   }
 
   const deleteNote = (id: string) => {
     setNotes(notes.filter((note) => note.id !== id))
+
+    toast({
+      title: "Note deleted",
+      description: "Your note has been successfully deleted.",
+    })
   }
 
   return (
@@ -65,7 +96,9 @@ export function ApplicationNotes({ applicationId }: ApplicationNotesProps) {
           )}
           <div className="space-y-4">
             {notes.length > 0 ? (
-              notes.map((note) => <ApplicationNote key={note.id} note={note} onDelete={() => deleteNote(note.id)} />)
+              notes.map((note) => (
+                <ApplicationNote key={note.id} note={note} onDelete={() => deleteNote(note.id)} onEdit={editNote} />
+              ))
             ) : (
               <div className="text-center py-4 text-muted-foreground">
                 No notes yet. Add your first note to keep track of important information.

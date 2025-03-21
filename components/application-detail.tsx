@@ -1,6 +1,7 @@
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Building2, MapPin, Calendar, DollarSign, Globe, User, Mail, Phone } from "lucide-react"
+import { statusVariantMap } from "@/lib/utils"
 
 interface ApplicationDetailProps {
   application: {
@@ -20,14 +21,6 @@ interface ApplicationDetailProps {
 }
 
 export function ApplicationDetail({ application }: ApplicationDetailProps) {
-  const statusColorMap: Record<string, string> = {
-    Applied: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300",
-    "Phone Screen": "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300",
-    Interview: "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300",
-    Offer: "bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-300",
-    Rejected: "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300",
-  }
-
   return (
     <div className="grid gap-6">
       <Card>
@@ -38,7 +31,7 @@ export function ApplicationDetail({ application }: ApplicationDetailProps) {
                 <Building2 className="h-5 w-5 text-muted-foreground" />
                 <span className="text-lg font-medium">{application.company}</span>
               </div>
-              <Badge className={statusColorMap[application.status]}>{application.status}</Badge>
+              <Badge variant={statusVariantMap[application.status] as any}>{application.status}</Badge>
             </div>
 
             <div className="grid gap-3">

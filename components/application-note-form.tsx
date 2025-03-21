@@ -21,20 +21,27 @@ const formSchema = z.object({
 interface ApplicationNoteFormProps {
   onSubmit: (data: z.infer<typeof formSchema>) => void
   onCancel: () => void
+  defaultValues?: {
+    title: string
+    content: string
+  }
+  submitLabel?: string
 }
 
-export function ApplicationNoteForm({ onSubmit, onCancel }: ApplicationNoteFormProps) {
+export function ApplicationNoteForm({
+  onSubmit,
+  onCancel,
+  defaultValues = { title: "", content: "" },
+  submitLabel = "Save Note",
+}: ApplicationNoteFormProps) {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: {
-      title: "",
-      content: "",
-    },
+    defaultValues,
   })
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 rounded-lg border p-4">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
         <FormField
           control={form.control}
           name="title"
@@ -65,7 +72,7 @@ export function ApplicationNoteForm({ onSubmit, onCancel }: ApplicationNoteFormP
           <Button variant="outline" type="button" onClick={onCancel}>
             Cancel
           </Button>
-          <Button type="submit">Save Note</Button>
+          <Button type="submit">{submitLabel}</Button>
         </div>
       </form>
     </Form>

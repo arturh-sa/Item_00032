@@ -1,5 +1,7 @@
-import type { Metadata } from "next"
-import { notFound } from "next/navigation"
+"use client"
+
+import { useEffect } from "react"
+import { useParams, useRouter } from "next/navigation"
 import { DashboardHeader } from "@/components/dashboard-header"
 import { DashboardShell } from "@/components/dashboard-shell"
 import { ApplicationDetail } from "@/components/application-detail"
@@ -9,60 +11,50 @@ import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Edit, ArrowLeft } from "lucide-react"
 import Link from "next/link"
+import { useApplications } from "@/contexts/applications-context"
 
-export const metadata: Metadata = {
-  title: "Application Details | JobTrackr",
-  description: "View and manage your job application details",
-}
+export default function ApplicationDetailPage() {
+  const params = useParams()
+  const router = useRouter()
+  const { getApplication } = useApplications()
 
-// This would normally fetch from a database
-const getApplication = (id: string) => {
-  // Mock data for demonstration
-  return {
-    id,
-    company: "Acme Inc",
-    position: "Senior Frontend Developer",
-    status: "Interview",
-    dateApplied: "2023-10-15",
-    location: "Remote",
-    salary: "$120,000 - $150,000",
-    description: "Senior Frontend Developer position with focus on React and Next.js",
-    contactName: "Jane Smith",
-    contactEmail: "jane.smith@acme.com",
-  }
-}
+  const id = typeof params.id === "string" ? params.id : params.id?.[0] || ""
+  const application = getApplication(id)
 
-export default function ApplicationDetailPage({
-  params,
-}: {
-  params: { id: string }
-}) {
-  const application = getApplication(params.id)
+  // Redirect to applications page if application not found
+  useEffect(() => {
+    if (!application) {
+      router.push("/applications")
+    }
+  }, [application, router])
 
   if (!application) {
-    notFound()
+    return null
   }
 
   return (
     <DashboardShell>
-      <div className="flex items-center">
-        <Button variant="ghost" size="sm" className="mr-2" asChild>
-          <Link href="/applications">
-            <ArrowLeft className="h-4 w-4 mr-1" />
-            Back
-          </Link>
-        </Button>
-        <DashboardHeader
-          heading={`${application.company} - ${application.position}`}
-          text={`Applied on ${application.dateApplied}`}
-        >
+      <div className="flex flex-col space-y-4">
+        <div className="flex items-center">
+          <Button variant="ghost" size="sm" className="mr-2" asChild>
+            <Link href="/applications">
+              <ArrowLeft className="h-4 w-4 mr-1" />
+              Back
+            </Link>
+          </Button>
+        </div>
+        <div className="flex items-center justify-between">
+          <DashboardHeader
+            heading={`${application.company} - ${application.position}`}
+            text={`Applied on ${application.dateApplied}`}
+          />
           <Button asChild>
-            <Link href={`/applications/${params.id}/edit`}>
+            <Link href={`/applications/${id}/edit`}>
               <Edit className="mr-2 h-4 w-4" />
               Edit
             </Link>
           </Button>
-        </DashboardHeader>
+        </div>
       </div>
 
       <Tabs defaultValue="details" className="w-full">
@@ -75,10 +67,10 @@ export default function ApplicationDetailPage({
           <ApplicationDetail application={application} />
         </TabsContent>
         <TabsContent value="timeline">
-          <ApplicationTimeline applicationId={params.id} />
+          <ApplicationTimeline applicationId={id} />
         </TabsContent>
         <TabsContent value="notes">
-          <ApplicationNotes applicationId={params.id} />
+          <ApplicationNotes applicationId={id} />
         </TabsContent>
       </Tabs>
     </DashboardShell>
