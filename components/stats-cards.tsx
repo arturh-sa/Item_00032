@@ -29,13 +29,15 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { statusVariantMap } from "@/lib/utils"
 import { upcomingInterviews } from "@/components/upcoming-interviews"
 
+// Update the allApplications array by changing all dates from 2023-10-xx to 2025-02-xx and 2023-11-xx to 2025-03-xx
+
 // Mock data for demonstration
 const allApplications = [
   {
     id: "1",
     company: "Acme Inc",
     position: "Senior Frontend Developer",
-    dateApplied: "2023-11-10",
+    dateApplied: "2025-03-10",
     status: "Applied",
     location: "Remote",
   },
@@ -43,7 +45,7 @@ const allApplications = [
     id: "2",
     company: "Globex Corp",
     position: "React Developer",
-    dateApplied: "2023-11-08",
+    dateApplied: "2025-03-08",
     status: "Applied",
     location: "New York, NY",
   },
@@ -51,7 +53,7 @@ const allApplications = [
     id: "3",
     company: "Initech",
     position: "UI/UX Developer",
-    dateApplied: "2023-11-05",
+    dateApplied: "2025-03-05",
     status: "Phone Screen",
     location: "San Francisco, CA",
   },
@@ -59,7 +61,7 @@ const allApplications = [
     id: "4",
     company: "Massive Dynamic",
     position: "Full Stack Developer",
-    dateApplied: "2023-11-01",
+    dateApplied: "2025-03-01",
     status: "Interview",
     location: "Boston, MA",
   },
@@ -67,7 +69,7 @@ const allApplications = [
     id: "5",
     company: "Cyberdyne Systems",
     position: "Frontend Engineer",
-    dateApplied: "2023-10-28",
+    dateApplied: "2025-02-28",
     status: "Rejected",
     location: "Austin, TX",
   },
@@ -75,7 +77,7 @@ const allApplications = [
     id: "6",
     company: "Stark Industries",
     position: "React Native Developer",
-    dateApplied: "2023-10-25",
+    dateApplied: "2025-02-25",
     status: "Offer",
     location: "Remote",
   },

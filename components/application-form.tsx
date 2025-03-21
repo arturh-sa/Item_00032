@@ -5,7 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import * as z from "zod"
 import { format } from "date-fns"
-import { CalendarIcon } from "lucide-react"
+import { CalendarIcon, AlertCircle } from "lucide-react"
 import { useRouter } from "next/navigation"
 
 import { cn } from "@/lib/utils"
@@ -16,6 +16,7 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { useToast } from "@/components/ui/use-toast"
 
 const formSchema = z.object({
   company: z.string().min(2, {
@@ -39,7 +40,8 @@ const formSchema = z.object({
 
 export function ApplicationForm() {
   const router = useRouter()
-  const [date, setDate] = useState<Date>()
+  const { toast } = useToast()
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -61,9 +63,17 @@ export function ApplicationForm() {
   })
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values)
+    setIsSubmitting(true)
+
     // Here you would typically save the data to your database
-    router.push("/applications")
+    setTimeout(() => {
+      toast({
+        title: "Application submitted",
+        description: "Your job application has been successfully saved.",
+      })
+      setIsSubmitting(false)
+      router.push("/applications")
+    }, 1000)
   }
 
   return (
@@ -77,9 +87,20 @@ export function ApplicationForm() {
               <FormItem>
                 <FormLabel>Company</FormLabel>
                 <FormControl>
-                  <Input placeholder="Company name" {...field} />
+                  <div className="relative">
+                    <Input
+                      placeholder="Company name"
+                      {...field}
+                      className={cn(form.formState.errors.company && "border-red-500 focus-visible:ring-red-500 pr-10")}
+                    />
+                    {form.formState.errors.company && (
+                      <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                        <AlertCircle className="h-5 w-5 text-red-500" />
+                      </div>
+                    )}
+                  </div>
                 </FormControl>
-                <FormMessage />
+                <FormMessage className="text-red-500 font-medium" />
               </FormItem>
             )}
           />
@@ -90,9 +111,22 @@ export function ApplicationForm() {
               <FormItem>
                 <FormLabel>Position</FormLabel>
                 <FormControl>
-                  <Input placeholder="Job title" {...field} />
+                  <div className="relative">
+                    <Input
+                      placeholder="Job title"
+                      {...field}
+                      className={cn(
+                        form.formState.errors.position && "border-red-500 focus-visible:ring-red-500 pr-10",
+                      )}
+                    />
+                    {form.formState.errors.position && (
+                      <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                        <AlertCircle className="h-5 w-5 text-red-500" />
+                      </div>
+                    )}
+                  </div>
                 </FormControl>
-                <FormMessage />
+                <FormMessage className="text-red-500 font-medium" />
               </FormItem>
             )}
           />
@@ -105,7 +139,7 @@ export function ApplicationForm() {
                 <FormControl>
                   <Input placeholder="City, State or Remote" {...field} />
                 </FormControl>
-                <FormMessage />
+                <FormMessage className="text-red-500 font-medium" />
               </FormItem>
             )}
           />
@@ -117,7 +151,9 @@ export function ApplicationForm() {
                 <FormLabel>Job Type</FormLabel>
                 <Select onValueChange={field.onChange} defaultValue={field.value}>
                   <FormControl>
-                    <SelectTrigger>
+                    <SelectTrigger
+                      className={cn(form.formState.errors.jobType && "border-red-500 focus-visible:ring-red-500")}
+                    >
                       <SelectValue placeholder="Select job type" />
                     </SelectTrigger>
                   </FormControl>
@@ -129,7 +165,7 @@ export function ApplicationForm() {
                     <SelectItem value="internship">Internship</SelectItem>
                   </SelectContent>
                 </Select>
-                <FormMessage />
+                <FormMessage className="text-red-500 font-medium" />
               </FormItem>
             )}
           />
@@ -141,7 +177,9 @@ export function ApplicationForm() {
                 <FormLabel>Status</FormLabel>
                 <Select onValueChange={field.onChange} defaultValue={field.value}>
                   <FormControl>
-                    <SelectTrigger>
+                    <SelectTrigger
+                      className={cn(form.formState.errors.status && "border-red-500 focus-visible:ring-red-500")}
+                    >
                       <SelectValue placeholder="Select status" />
                     </SelectTrigger>
                   </FormControl>
@@ -153,7 +191,7 @@ export function ApplicationForm() {
                     <SelectItem value="Rejected">Rejected</SelectItem>
                   </SelectContent>
                 </Select>
-                <FormMessage />
+                <FormMessage className="text-red-500 font-medium" />
               </FormItem>
             )}
           />
@@ -164,9 +202,20 @@ export function ApplicationForm() {
               <FormItem>
                 <FormLabel>Job URL</FormLabel>
                 <FormControl>
-                  <Input placeholder="https://example.com/job" {...field} />
+                  <div className="relative">
+                    <Input
+                      placeholder="https://example.com/job"
+                      {...field}
+                      className={cn(form.formState.errors.url && "border-red-500 focus-visible:ring-red-500 pr-10")}
+                    />
+                    {form.formState.errors.url && (
+                      <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                        <AlertCircle className="h-5 w-5 text-red-500" />
+                      </div>
+                    )}
+                  </div>
                 </FormControl>
-                <FormMessage />
+                <FormMessage className="text-red-500 font-medium" />
               </FormItem>
             )}
           />
@@ -179,7 +228,7 @@ export function ApplicationForm() {
                 <FormControl>
                   <Input placeholder="e.g. $80,000 - $100,000" {...field} />
                 </FormControl>
-                <FormMessage />
+                <FormMessage className="text-red-500 font-medium" />
               </FormItem>
             )}
           />
@@ -194,7 +243,11 @@ export function ApplicationForm() {
                     <FormControl>
                       <Button
                         variant={"outline"}
-                        className={cn("w-full pl-3 text-left font-normal", !field.value && "text-muted-foreground")}
+                        className={cn(
+                          "w-full pl-3 text-left font-normal",
+                          !field.value && "text-muted-foreground",
+                          form.formState.errors.dateApplied && "border-red-500 focus-visible:ring-red-500",
+                        )}
                       >
                         {field.value ? format(field.value, "PPP") : <span>Pick a date</span>}
                         <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
@@ -202,10 +255,16 @@ export function ApplicationForm() {
                     </FormControl>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar mode="single" selected={field.value} onSelect={field.onChange} initialFocus />
+                    <Calendar
+                      mode="single"
+                      selected={field.value}
+                      onSelect={field.onChange}
+                      initialFocus
+                      disabled={(date) => date > new Date()}
+                    />
                   </PopoverContent>
                 </Popover>
-                <FormMessage />
+                <FormMessage className="text-red-500 font-medium" />
               </FormItem>
             )}
           />
@@ -218,9 +277,23 @@ export function ApplicationForm() {
             <FormItem>
               <FormLabel>Job Description</FormLabel>
               <FormControl>
-                <Textarea placeholder="Enter job description" className="min-h-[100px]" {...field} />
+                <div className="relative">
+                  <Textarea
+                    placeholder="Enter job description"
+                    className={cn(
+                      "min-h-[100px]",
+                      form.formState.errors.description && "border-red-500 focus-visible:ring-red-500",
+                    )}
+                    {...field}
+                  />
+                  {form.formState.errors.description && (
+                    <div className="absolute top-3 right-3 pointer-events-none">
+                      <AlertCircle className="h-5 w-5 text-red-500" />
+                    </div>
+                  )}
+                </div>
               </FormControl>
-              <FormMessage />
+              <FormMessage className="text-red-500 font-medium" />
             </FormItem>
           )}
         />
@@ -238,7 +311,7 @@ export function ApplicationForm() {
                   {...field}
                 />
               </FormControl>
-              <FormMessage />
+              <FormMessage className="text-red-500 font-medium" />
             </FormItem>
           )}
         />
@@ -253,7 +326,7 @@ export function ApplicationForm() {
                 <FormControl>
                   <Input placeholder="Contact person" {...field} />
                 </FormControl>
-                <FormMessage />
+                <FormMessage className="text-red-500 font-medium" />
               </FormItem>
             )}
           />
@@ -264,9 +337,22 @@ export function ApplicationForm() {
               <FormItem>
                 <FormLabel>Contact Email</FormLabel>
                 <FormControl>
-                  <Input placeholder="contact@example.com" {...field} />
+                  <div className="relative">
+                    <Input
+                      placeholder="contact@example.com"
+                      {...field}
+                      className={cn(
+                        form.formState.errors.contactEmail && "border-red-500 focus-visible:ring-red-500 pr-10",
+                      )}
+                    />
+                    {form.formState.errors.contactEmail && (
+                      <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                        <AlertCircle className="h-5 w-5 text-red-500" />
+                      </div>
+                    )}
+                  </div>
                 </FormControl>
-                <FormMessage />
+                <FormMessage className="text-red-500 font-medium" />
               </FormItem>
             )}
           />
@@ -279,17 +365,19 @@ export function ApplicationForm() {
                 <FormControl>
                   <Input placeholder="(123) 456-7890" {...field} />
                 </FormControl>
-                <FormMessage />
+                <FormMessage className="text-red-500 font-medium" />
               </FormItem>
             )}
           />
         </div>
 
         <div className="flex justify-end space-x-4">
-          <Button variant="outline" type="button" onClick={() => router.back()}>
+          <Button variant="outline" type="button" onClick={() => router.back()} disabled={isSubmitting}>
             Cancel
           </Button>
-          <Button type="submit">Save Application</Button>
+          <Button type="submit" disabled={isSubmitting}>
+            {isSubmitting ? "Saving..." : "Save Application"}
+          </Button>
         </div>
       </form>
     </Form>

@@ -12,18 +12,20 @@ interface ApplicationNotesProps {
   applicationId: string
 }
 
+// Update the initialNotes array by changing all dates from 2023-10-xx to 2025-02-xx and 2023-11-xx to 2025-03-xx
+
 // Mock data for demonstration
 const initialNotes = [
   {
     id: "1",
-    date: "2023-11-10",
+    date: "2025-03-10",
     title: "Initial Research",
     content:
       "Researched the company and found they have a strong focus on AI and machine learning. Their tech stack includes React, Next.js, and Node.js.",
   },
   {
     id: "2",
-    date: "2023-11-15",
+    date: "2025-03-15",
     title: "Preparation Notes",
     content:
       "Prepared answers for common interview questions. Reviewed my projects that are most relevant to this role.",

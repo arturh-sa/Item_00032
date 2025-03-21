@@ -3,7 +3,9 @@
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import * as z from "zod"
+import { AlertCircle } from "lucide-react"
 
+import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
@@ -49,9 +51,20 @@ export function ApplicationNoteForm({
             <FormItem>
               <FormLabel>Title</FormLabel>
               <FormControl>
-                <Input placeholder="Note title" {...field} />
+                <div className="relative">
+                  <Input
+                    placeholder="Note title"
+                    {...field}
+                    className={cn(form.formState.errors.title && "border-red-500 focus-visible:ring-red-500 pr-10")}
+                  />
+                  {form.formState.errors.title && (
+                    <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                      <AlertCircle className="h-5 w-5 text-red-500" />
+                    </div>
+                  )}
+                </div>
               </FormControl>
-              <FormMessage />
+              <FormMessage className="text-red-500 font-medium" />
             </FormItem>
           )}
         />
@@ -62,9 +75,23 @@ export function ApplicationNoteForm({
             <FormItem>
               <FormLabel>Content</FormLabel>
               <FormControl>
-                <Textarea placeholder="Write your note here..." className="min-h-[150px]" {...field} />
+                <div className="relative">
+                  <Textarea
+                    placeholder="Write your note here..."
+                    className={cn(
+                      "min-h-[150px]",
+                      form.formState.errors.content && "border-red-500 focus-visible:ring-red-500",
+                    )}
+                    {...field}
+                  />
+                  {form.formState.errors.content && (
+                    <div className="absolute top-3 right-3 pointer-events-none">
+                      <AlertCircle className="h-5 w-5 text-red-500" />
+                    </div>
+                  )}
+                </div>
               </FormControl>
-              <FormMessage />
+              <FormMessage className="text-red-500 font-medium" />
             </FormItem>
           )}
         />

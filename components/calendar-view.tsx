@@ -1,11 +1,26 @@
 "use client"
 
 import { useState, useEffect, useCallback, useMemo } from "react"
-import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, addMonths, subMonths, parse } from "date-fns"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import {
+  format,
+  startOfMonth,
+  endOfMonth,
+  eachDayOfInterval,
+  isSameDay,
+  addMonths,
+  subMonths,
+  parse,
+  setMonth,
+  setYear,
+  getYear,
+  getMonth,
+  addYears,
+  subYears,
+} from "date-fns"
+import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { ChevronLeft, ChevronRight, Code, Users, CheckCircle, Phone } from "lucide-react"
+import { ChevronLeft, ChevronRight, Code, Users, CheckCircle, Phone, CalendarIcon } from "lucide-react"
 import {
   Dialog,
   DialogContent,
@@ -14,6 +29,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { useSearchParams } from "next/navigation"
 import { statusVariantMap } from "@/lib/utils"
 import { upcomingInterviews } from "@/components/upcoming-interviews"
@@ -37,7 +53,7 @@ const events = upcomingInterviews.map((interview) => ({
 events.push({
   id: "app-1",
   title: "Application Deadline - Acme Inc",
-  date: "2023-11-25",
+  date: "2025-03-25",
   type: "Applied",
   company: "Acme Inc",
   position: "Senior Developer",
@@ -49,6 +65,22 @@ export function CalendarView() {
   const [selectedEvents, setSelectedEvents] = useState<any[]>([])
   const [initialDateProcessed, setInitialDateProcessed] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
+  const [isMonthPickerOpen, setIsMonthPickerOpen] = useState(false)
+  const [isYearPickerOpen, setIsYearPickerOpen] = useState(false)
+
+  // Generate years array for the picker (current year ± 5 years)
+  const currentYear = getYear(new Date())
+  const years = useMemo(() => {
+    return Array.from({ length: 11 }, (_, i) => (currentYear - 5 + i).toString())
+  }, [currentYear])
+
+  // Generate months array for the picker
+  const months = useMemo(() => {
+    return Array.from({ length: 12 }, (_, i) => ({
+      value: i.toString(),
+      label: format(new Date(2000, i, 1), "MMMM"),
+    }))
+  }, [])
 
   // Check for mobile screen size
   useEffect(() => {
@@ -98,12 +130,35 @@ export function CalendarView() {
   const monthEnd = endOfMonth(currentDate)
   const monthDays = eachDayOfInterval({ start: monthStart, end: monthEnd })
 
+  // Navigation functions
   const previousMonth = () => {
     setCurrentDate(subMonths(currentDate, 1))
   }
 
   const nextMonth = () => {
     setCurrentDate(addMonths(currentDate, 1))
+  }
+
+  const previousYear = () => {
+    setCurrentDate(subYears(currentDate, 1))
+  }
+
+  const nextYear = () => {
+    setCurrentDate(addYears(currentDate, 1))
+  }
+
+  // Handle month change
+  const handleMonthChange = (value: string) => {
+    const newDate = setMonth(currentDate, Number.parseInt(value))
+    setCurrentDate(newDate)
+    setIsMonthPickerOpen(false)
+  }
+
+  // Handle year change
+  const handleYearChange = (value: string) => {
+    const newDate = setYear(currentDate, Number.parseInt(value))
+    setCurrentDate(newDate)
+    setIsYearPickerOpen(false)
   }
 
   // Memoize the handleDateClick function to prevent unnecessary re-renders
@@ -139,15 +194,79 @@ export function CalendarView() {
     }
   }
 
+  // Get current month and year display
+  const currentMonthName = format(currentDate, "MMMM")
+  const currentYearValue = format(currentDate, "yyyy")
+
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-xl font-bold">{format(currentDate, "MMMM yyyy")}</CardTitle>
-        <div className="flex space-x-2">
-          <Button variant="outline" size="icon" onClick={previousMonth}>
+        <div className="flex items-center">
+          <CalendarIcon className="h-5 w-5 mr-2 text-muted-foreground" />
+          <span className="text-lg font-medium">{format(currentDate, "MMMM yyyy")}</span>
+        </div>
+        <div className="flex items-center border rounded-md overflow-hidden">
+          {/* Month Navigation */}
+          <Button variant="ghost" size="sm" onClick={previousMonth} className="px-2 rounded-none border-r h-9">
             <ChevronLeft className="h-4 w-4" />
           </Button>
-          <Button variant="outline" size="icon" onClick={nextMonth}>
+
+          <Popover open={isMonthPickerOpen} onOpenChange={setIsMonthPickerOpen}>
+            <PopoverTrigger asChild>
+              <Button variant="ghost" size="sm" className="px-3 rounded-none border-r h-9 font-medium">
+                {currentMonthName}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="center">
+              <div className="grid grid-cols-3 gap-1 p-2">
+                {months.map((month) => (
+                  <Button
+                    key={month.value}
+                    variant={Number.parseInt(month.value) === getMonth(currentDate) ? "default" : "ghost"}
+                    size="sm"
+                    className="w-full"
+                    onClick={() => handleMonthChange(month.value)}
+                  >
+                    {isMobile ? month.label.substring(0, 3) : month.label}
+                  </Button>
+                ))}
+              </div>
+            </PopoverContent>
+          </Popover>
+
+          <Button variant="ghost" size="sm" onClick={nextMonth} className="px-2 rounded-none border-r h-9">
+            <ChevronRight className="h-4 w-4" />
+          </Button>
+
+          {/* Year Navigation */}
+          <Button variant="ghost" size="sm" onClick={previousYear} className="px-2 rounded-none border-r h-9">
+            <ChevronLeft className="h-4 w-4" />
+          </Button>
+
+          <Popover open={isYearPickerOpen} onOpenChange={setIsYearPickerOpen}>
+            <PopoverTrigger asChild>
+              <Button variant="ghost" size="sm" className="px-3 rounded-none border-r h-9 font-medium">
+                {currentYearValue}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="center">
+              <div className="grid grid-cols-3 gap-1 p-2 max-h-[200px] overflow-y-auto">
+                {years.map((year) => (
+                  <Button
+                    key={year}
+                    variant={Number.parseInt(year) === getYear(currentDate) ? "default" : "ghost"}
+                    size="sm"
+                    className="w-full"
+                    onClick={() => handleYearChange(year)}
+                  >
+                    {year}
+                  </Button>
+                ))}
+              </div>
+            </PopoverContent>
+          </Popover>
+
+          <Button variant="ghost" size="sm" onClick={nextYear} className="px-2 rounded-none h-9">
             <ChevronRight className="h-4 w-4" />
           </Button>
         </div>

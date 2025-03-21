@@ -15,11 +15,8 @@ function CalendarSkeleton() {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <Skeleton className="h-8 w-[200px]" />
-        <div className="flex space-x-2">
-          <Skeleton className="h-8 w-8" />
-          <Skeleton className="h-8 w-8" />
-        </div>
+        <Skeleton className="h-8 w-[180px]" /> {/* Month/year display */}
+        <Skeleton className="h-9 w-[280px]" /> {/* Navigation controls */}
       </div>
       <div className="grid grid-cols-7 gap-1">
         {Array.from({ length: 7 }).map((_, i) => (

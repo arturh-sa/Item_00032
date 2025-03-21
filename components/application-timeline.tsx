@@ -11,23 +11,25 @@ interface ApplicationTimelineProps {
   applicationId: string
 }
 
+// Update the timelineEvents array by changing all dates from 2023-10-xx to 2025-02-xx and 2023-11-xx to 2025-03-xx
+
 // Mock data for demonstration
 const timelineEvents = [
   {
     id: "1",
-    date: "2023-11-10",
+    date: "2025-03-10",
     type: "Applied",
     notes: "Submitted application through company website.",
   },
   {
     id: "2",
-    date: "2023-11-15",
+    date: "2025-03-15",
     type: "Phone Screen",
     notes: "30-minute call with HR. Discussed background and experience.",
   },
   {
     id: "3",
-    date: "2023-11-20",
+    date: "2025-03-20",
     type: "Technical Interview",
     notes: "1-hour technical interview with the engineering team. Covered React, Next.js, and system design.",
   },

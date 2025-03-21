@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import * as z from "zod"
 import { format } from "date-fns"
-import { CalendarIcon } from "lucide-react"
+import { CalendarIcon, AlertCircle } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -16,7 +16,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 
 const formSchema = z.object({
   date: z.date(),
-  type: z.string(),
+  type: z.string().min(1, { message: "Please select an event type" }),
   notes: z.string().optional(),
 })
 
@@ -50,7 +50,11 @@ export function ApplicationTimelineForm({ onSubmit, onCancel }: ApplicationTimel
                     <FormControl>
                       <Button
                         variant={"outline"}
-                        className={cn("w-full pl-3 text-left font-normal", !field.value && "text-muted-foreground")}
+                        className={cn(
+                          "w-full pl-3 text-left font-normal",
+                          !field.value && "text-muted-foreground",
+                          form.formState.errors.date && "border-red-500 focus-visible:ring-red-500",
+                        )}
                       >
                         {field.value ? format(field.value, "PPP") : <span>Pick a date</span>}
                         <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
@@ -61,7 +65,7 @@ export function ApplicationTimelineForm({ onSubmit, onCancel }: ApplicationTimel
                     <Calendar mode="single" selected={field.value} onSelect={field.onChange} initialFocus />
                   </PopoverContent>
                 </Popover>
-                <FormMessage />
+                <FormMessage className="text-red-500 font-medium" />
               </FormItem>
             )}
           />
@@ -73,7 +77,9 @@ export function ApplicationTimelineForm({ onSubmit, onCancel }: ApplicationTimel
                 <FormLabel>Event Type</FormLabel>
                 <Select onValueChange={field.onChange} defaultValue={field.value}>
                   <FormControl>
-                    <SelectTrigger>
+                    <SelectTrigger
+                      className={cn(form.formState.errors.type && "border-red-500 focus-visible:ring-red-500")}
+                    >
                       <SelectValue placeholder="Select event type" />
                     </SelectTrigger>
                   </FormControl>
@@ -88,7 +94,7 @@ export function ApplicationTimelineForm({ onSubmit, onCancel }: ApplicationTimel
                     <SelectItem value="Declined">Declined</SelectItem>
                   </SelectContent>
                 </Select>
-                <FormMessage />
+                <FormMessage className="text-red-500 font-medium" />
               </FormItem>
             )}
           />
@@ -100,9 +106,23 @@ export function ApplicationTimelineForm({ onSubmit, onCancel }: ApplicationTimel
             <FormItem>
               <FormLabel>Notes</FormLabel>
               <FormControl>
-                <Textarea placeholder="Add notes about this event" className="min-h-[100px]" {...field} />
+                <div className="relative">
+                  <Textarea
+                    placeholder="Add notes about this event"
+                    className={cn(
+                      "min-h-[100px]",
+                      form.formState.errors.notes && "border-red-500 focus-visible:ring-red-500",
+                    )}
+                    {...field}
+                  />
+                  {form.formState.errors.notes && (
+                    <div className="absolute top-3 right-3 pointer-events-none">
+                      <AlertCircle className="h-5 w-5 text-red-500" />
+                    </div>
+                  )}
+                </div>
               </FormControl>
-              <FormMessage />
+              <FormMessage className="text-red-500 font-medium" />
             </FormItem>
           )}
         />
