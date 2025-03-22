@@ -11,12 +11,12 @@ import {
     DialogDescription,
     DialogHeader,
     DialogTitle,
-    DialogTrigger,
     DialogFooter,
 } from "@/components/ui/dialog"
 import {ApplicationNoteForm} from "@/components/application-note-form"
 import {useToast} from "@/components/ui/use-toast"
 import {statusVariantMap} from "@/lib/utils"
+import {cn} from "@/lib/utils"
 
 // Shared mock data for consistency across components
 export const upcomingInterviews = [
@@ -91,10 +91,15 @@ export const upcomingInterviews = [
     },
 ]
 
-export function UpcomingInterviews() {
+interface UpcomingInterviewsProps {
+    className?: string
+}
+
+export function UpcomingInterviews({className}: UpcomingInterviewsProps) {
     const [interviews, setInterviews] = useState(upcomingInterviews.filter((i) => i.status === "Upcoming"))
     const [selectedInterview, setSelectedInterview] = useState<string | null>(null)
     const [showNotesForm, setShowNotesForm] = useState(false)
+    const [interviewDialogOpen, setInterviewDialogOpen] = useState(false)
     const {toast} = useToast()
 
     // Function to handle prepare notes button click
@@ -146,7 +151,7 @@ export function UpcomingInterviews() {
     }
 
     return (
-        <Card>
+        <Card className={cn("w-full", className)}>
             <CardHeader>
                 <CardTitle>Upcoming Interviews</CardTitle>
                 <CardDescription>Your scheduled interviews for the next 7 days</CardDescription>
@@ -154,85 +159,114 @@ export function UpcomingInterviews() {
             <CardContent>
                 <div className="space-y-4">
                     {interviews.map((interview) => (
-                        <Dialog key={interview.id}>
-                            <DialogTrigger asChild>
-                                <div
-                                    className="flex items-start space-x-4 rounded-md border p-3 cursor-pointer hover:bg-muted/50 transition-colors">
-                                    <div className="flex-1 space-y-1">
-                                        <p className="font-medium leading-none">{interview.company}</p>
-                                        <p className="text-sm text-muted-foreground">{interview.position}</p>
-                                        <div className="flex items-center pt-2">
-                                            <Calendar className="mr-1 h-4 w-4 text-muted-foreground"/>
-                                            <span className="text-xs text-muted-foreground">{interview.date}</span>
-                                            <Clock className="ml-3 mr-1 h-4 w-4 text-muted-foreground"/>
-                                            <span className="text-xs text-muted-foreground">{interview.time}</span>
-                                        </div>
+                        <div key={interview.id}>
+                            <div
+                                className="flex items-start space-x-4 rounded-md border p-3 cursor-pointer hover:bg-muted/50 transition-colors"
+                                onClick={() => {
+                                    setSelectedInterview(interview.id)
+                                    setInterviewDialogOpen(true)
+                                }}
+                            >
+                                <div className="flex-1 space-y-1">
+                                    <p className="font-medium leading-none">{interview.company}</p>
+                                    <p className="text-sm text-muted-foreground">{interview.position}</p>
+                                    <div className="flex items-center pt-2">
+                                        <Calendar className="mr-1 h-4 w-4 text-muted-foreground"/>
+                                        <span className="text-xs text-muted-foreground">{interview.date}</span>
+                                        <Clock className="ml-3 mr-1 h-4 w-4 text-muted-foreground"/>
+                                        <span className="text-xs text-muted-foreground">{interview.time}</span>
                                     </div>
-                                    <Badge variant={statusVariantMap[interview.type]?.toLowerCase() as any}
-                                           className="flex items-center">
-                                        {getInterviewTypeIcon(interview.type)}
-                                        {interview.type}
-                                    </Badge>
                                 </div>
-                            </DialogTrigger>
-                            <DialogContent className="sm:max-w-[500px]">
-                                <DialogHeader>
-                                    <DialogTitle className="text-xl">{interview.company} Interview</DialogTitle>
-                                    <DialogDescription>Details for your upcoming interview</DialogDescription>
-                                </DialogHeader>
-                                <div className="grid gap-4 py-4">
-                                    <div className="flex items-start gap-3">
-                                        <Building2 className="h-5 w-5 text-muted-foreground shrink-0 mt-0.5"/>
-                                        <div>
-                                            <p className="font-medium">{interview.company}</p>
-                                            <p className="text-sm text-muted-foreground">{interview.position}</p>
-                                        </div>
-                                    </div>
-                                    <div className="flex items-start gap-3">
-                                        <Calendar className="h-5 w-5 text-muted-foreground shrink-0 mt-0.5"/>
-                                        <div>
-                                            <p className="font-medium">Date & Time</p>
-                                            <p className="text-sm text-muted-foreground">
-                                                {interview.date} at {interview.time}
-                                            </p>
-                                        </div>
-                                    </div>
-                                    <div className="flex items-start gap-3">
-                                        <MapPin className="h-5 w-5 text-muted-foreground shrink-0 mt-0.5"/>
-                                        <div>
-                                            <p className="font-medium">Location</p>
-                                            <p className="text-sm text-muted-foreground">{interview.location}</p>
-                                        </div>
-                                    </div>
-                                    <div className="flex items-start gap-3">
-                                        <User className="h-5 w-5 text-muted-foreground shrink-0 mt-0.5"/>
-                                        <div>
-                                            <p className="font-medium">Interviewer</p>
-                                            <p className="text-sm text-muted-foreground">{interview.interviewer}</p>
-                                        </div>
-                                    </div>
-                                    <div className="space-y-1.5">
-                                        <p className="font-medium">Description</p>
-                                        <p className="text-sm text-muted-foreground">{interview.description}</p>
-                                    </div>
-
-                                    {interview.notes && (
-                                        <div className="space-y-1.5 bg-muted p-3 rounded-md">
-                                            <p className="font-medium">Your Notes</p>
-                                            <p className="text-sm text-muted-foreground">{interview.notes}</p>
-                                        </div>
-                                    )}
-                                </div>
-                                <DialogFooter>
-                                    <Button onClick={() => setShowNotesForm(true)}>
-                                        {interview.notes ? "Edit Notes" : "Prepare Notes"}
-                                    </Button>
-                                </DialogFooter>
-                            </DialogContent>
-                        </Dialog>
+                                <Badge variant={statusVariantMap[interview.type]?.toLowerCase() as any}
+                                       className="flex items-center">
+                                    {getInterviewTypeIcon(interview.type)}
+                                    {interview.type}
+                                </Badge>
+                            </div>
+                        </div>
                     ))}
                 </div>
             </CardContent>
+
+            {/* Interview Detail Dialog */}
+            <Dialog open={interviewDialogOpen} onOpenChange={setInterviewDialogOpen}>
+                <DialogContent className="sm:max-w-[500px]">
+                    {selectedInterview && (
+                        <>
+                            <DialogHeader>
+                                <DialogTitle className="text-xl">
+                                    {interviews.find((i) => i.id === selectedInterview)?.company} Interview
+                                </DialogTitle>
+                                <DialogDescription>Details for your upcoming interview</DialogDescription>
+                            </DialogHeader>
+                            <div className="grid gap-4 py-4">
+                                <div className="flex items-start gap-3">
+                                    <Building2 className="h-5 w-5 text-muted-foreground shrink-0 mt-0.5"/>
+                                    <div>
+                                        <p className="font-medium">{interviews.find((i) => i.id === selectedInterview)?.company}</p>
+                                        <p className="text-sm text-muted-foreground">
+                                            {interviews.find((i) => i.id === selectedInterview)?.position}
+                                        </p>
+                                    </div>
+                                </div>
+                                <div className="flex items-start gap-3">
+                                    <Calendar className="h-5 w-5 text-muted-foreground shrink-0 mt-0.5"/>
+                                    <div>
+                                        <p className="font-medium">Date & Time</p>
+                                        <p className="text-sm text-muted-foreground">
+                                            {interviews.find((i) => i.id === selectedInterview)?.date} at{" "}
+                                            {interviews.find((i) => i.id === selectedInterview)?.time}
+                                        </p>
+                                    </div>
+                                </div>
+                                <div className="flex items-start gap-3">
+                                    <MapPin className="h-5 w-5 text-muted-foreground shrink-0 mt-0.5"/>
+                                    <div>
+                                        <p className="font-medium">Location</p>
+                                        <p className="text-sm text-muted-foreground">
+                                            {interviews.find((i) => i.id === selectedInterview)?.location}
+                                        </p>
+                                    </div>
+                                </div>
+                                <div className="flex items-start gap-3">
+                                    <User className="h-5 w-5 text-muted-foreground shrink-0 mt-0.5"/>
+                                    <div>
+                                        <p className="font-medium">Interviewer</p>
+                                        <p className="text-sm text-muted-foreground">
+                                            {interviews.find((i) => i.id === selectedInterview)?.interviewer}
+                                        </p>
+                                    </div>
+                                </div>
+                                <div className="space-y-1.5">
+                                    <p className="font-medium">Description</p>
+                                    <p className="text-sm text-muted-foreground">
+                                        {interviews.find((i) => i.id === selectedInterview)?.description}
+                                    </p>
+                                </div>
+
+                                {interviews.find((i) => i.id === selectedInterview)?.notes && (
+                                    <div className="space-y-1.5 bg-muted p-3 rounded-md">
+                                        <p className="font-medium">Your Notes</p>
+                                        <p className="text-sm text-muted-foreground">
+                                            {interviews.find((i) => i.id === selectedInterview)?.notes}
+                                        </p>
+                                    </div>
+                                )}
+                            </div>
+                            <DialogFooter>
+                                <Button
+                                    onClick={() => {
+                                        setShowNotesForm(true)
+                                        setInterviewDialogOpen(false)
+                                    }}
+                                >
+                                    {interviews.find((i) => i.id === selectedInterview)?.notes ? "Edit Notes" : "Prepare Notes"}
+                                </Button>
+                            </DialogFooter>
+                        </>
+                    )}
+                </DialogContent>
+            </Dialog>
 
             {/* Notes Form Dialog */}
             <Dialog open={showNotesForm} onOpenChange={setShowNotesForm}>

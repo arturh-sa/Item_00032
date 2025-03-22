@@ -208,13 +208,14 @@ export function CalendarView() {
                 <div className="flex items-center border rounded-md overflow-hidden">
                     {/* Month Navigation */}
                     <Button variant="ghost" size="sm" onClick={previousMonth}
-                            className="px-2 rounded-none border-r h-9">
+                            className="px-2 rounded-none border-r h-9 w-9">
                         <ChevronLeft className="h-4 w-4"/>
                     </Button>
 
                     <Popover open={isMonthPickerOpen} onOpenChange={setIsMonthPickerOpen}>
                         <PopoverTrigger asChild>
-                            <Button variant="ghost" size="sm" className="px-3 rounded-none border-r h-9 font-medium">
+                            <Button variant="ghost" size="sm"
+                                    className="px-3 rounded-none border-r h-9 w-24 font-medium">
                                 {currentMonthName}
                             </Button>
                         </PopoverTrigger>
@@ -235,18 +236,21 @@ export function CalendarView() {
                         </PopoverContent>
                     </Popover>
 
-                    <Button variant="ghost" size="sm" onClick={nextMonth} className="px-2 rounded-none border-r h-9">
+                    <Button variant="ghost" size="sm" onClick={nextMonth}
+                            className="px-2 rounded-none border-r h-9 w-9">
                         <ChevronRight className="h-4 w-4"/>
                     </Button>
 
                     {/* Year Navigation */}
-                    <Button variant="ghost" size="sm" onClick={previousYear} className="px-2 rounded-none border-r h-9">
+                    <Button variant="ghost" size="sm" onClick={previousYear}
+                            className="px-2 rounded-none border-r h-9 w-9">
                         <ChevronLeft className="h-4 w-4"/>
                     </Button>
 
                     <Popover open={isYearPickerOpen} onOpenChange={setIsYearPickerOpen}>
                         <PopoverTrigger asChild>
-                            <Button variant="ghost" size="sm" className="px-3 rounded-none border-r h-9 font-medium">
+                            <Button variant="ghost" size="sm"
+                                    className="px-3 rounded-none border-r h-9 w-16 font-medium">
                                 {currentYearValue}
                             </Button>
                         </PopoverTrigger>
@@ -267,7 +271,7 @@ export function CalendarView() {
                         </PopoverContent>
                     </Popover>
 
-                    <Button variant="ghost" size="sm" onClick={nextYear} className="px-2 rounded-none h-9">
+                    <Button variant="ghost" size="sm" onClick={nextYear} className="px-2 rounded-none h-9 w-9">
                         <ChevronRight className="h-4 w-4"/>
                     </Button>
                 </div>
@@ -305,19 +309,43 @@ export function CalendarView() {
                                                     // Get the correct variant for this event type
                                                     const variant = statusVariantMap[event.type]?.toLowerCase() || "default"
 
-                                                    return (
+                                                    return isMobile ? (
+                                                        <div
+                                                            key={event.id}
+                                                            className={`h-2 w-2 rounded-full mx-auto bg-${variant}-500`}
+                                                            style={{
+                                                                backgroundColor:
+                                                                    variant === "applied"
+                                                                        ? "rgb(59, 130, 246)"
+                                                                        : // blue
+                                                                        variant === "phoneScreen"
+                                                                            ? "rgb(139, 92, 246)"
+                                                                            : // purple
+                                                                            variant === "interview"
+                                                                                ? "rgb(16, 185, 129)"
+                                                                                : // green
+                                                                                variant === "offer"
+                                                                                    ? "rgb(245, 158, 11)"
+                                                                                    : // amber
+                                                                                    variant === "rejected"
+                                                                                        ? "rgb(239, 68, 68)"
+                                                                                        : // red
+                                                                                        "rgb(156, 163, 175)", // gray (default)
+                                                            }}
+                                                        />
+                                                    ) : (
                                                         <Badge
                                                             key={event.id}
                                                             variant={variant as any}
                                                             className="flex items-center text-xs w-full justify-center"
                                                         >
                                                             {getEventTypeIcon(event.type)}
-                                                            {isMobile ? event.type : event.type + " - " + event.company}
+                                                            {event.type + " - " + event.company}
                                                         </Badge>
                                                     )
                                                 })}
                                                 {dayEvents.length > (isMobile ? 1 : 2) && (
-                                                    <div className="text-xs text-muted-foreground">
+                                                    <div className="text-xs text-muted-foreground text-center">
                                                         +{dayEvents.length - (isMobile ? 1 : 2)} more
                                                     </div>
                                                 )}
@@ -325,25 +353,26 @@ export function CalendarView() {
                                         )}
                                     </div>
                                 </DialogTrigger>
-                                <DialogContent className="sm:max-w-[500px]">
+                                <DialogContent className="sm:max-w-[500px] max-w-[90vw]">
                                     <DialogHeader>
                                         <DialogTitle>{format(day, "EEEE, MMMM d, yyyy")}</DialogTitle>
                                         <DialogDescription>Events for this day</DialogDescription>
                                     </DialogHeader>
-                                    <div className="space-y-4 mt-4">
+                                    <div className="space-y-4 mt-4 max-w-full overflow-hidden">
                                         {dayEvents.length > 0 ? (
                                             dayEvents.map((event) => (
                                                 <div key={event.id}
-                                                     className="flex items-center justify-between border-b pb-2">
-                                                    <div>
-                                                        <p className="font-medium">{event.company}</p>
-                                                        <p className="text-sm text-muted-foreground">{event.position}</p>
-                                                        {event.time &&
-                                                            <p className="text-xs text-muted-foreground mt-1">Time: {event.time}</p>}
+                                                     className="flex flex-wrap items-center justify-between border-b pb-2">
+                                                    <div className="max-w-[70%]">
+                                                        <p className="font-medium truncate">{event.company}</p>
+                                                        <p className="text-sm text-muted-foreground truncate">{event.position}</p>
+                                                        {event.time && (
+                                                            <p className="text-xs text-muted-foreground mt-1 truncate">Time: {event.time}</p>
+                                                        )}
                                                     </div>
                                                     <Badge
                                                         variant={statusVariantMap[event.type]?.toLowerCase() as any}
-                                                        className="flex items-center"
+                                                        className="flex items-center mt-1 md:mt-0"
                                                     >
                                                         {getEventTypeIcon(event.type)}
                                                         {event.type}

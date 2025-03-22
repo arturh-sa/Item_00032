@@ -15,10 +15,10 @@ export default function DashboardPage() {
         <DashboardShell>
             <DashboardHeader heading="Dashboard" text="Track and manage your job applications in one place."/>
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-                <ApplicationsOverview className="col-span-4"/>
-                <div className="col-span-3 space-y-4">
-                    <UpcomingInterviews/>
-                    <RecentApplications/>
+                <ApplicationsOverview className="w-full md:col-span-2 lg:col-span-4"/>
+                <div className="w-full md:col-span-2 lg:col-span-3 space-y-4">
+                    <UpcomingInterviews className="w-full"/>
+                    <RecentApplications className="w-full"/>
                 </div>
             </div>
         </DashboardShell>

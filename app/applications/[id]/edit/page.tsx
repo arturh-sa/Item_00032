@@ -5,9 +5,6 @@ import {useParams, useRouter} from "next/navigation"
 import {DashboardHeader} from "@/components/dashboard-header"
 import {DashboardShell} from "@/components/dashboard-shell"
 import {EditApplicationForm} from "@/components/edit-application-form"
-import {Button} from "@/components/ui/button"
-import {ArrowLeft} from "lucide-react"
-import Link from "next/link"
 import {useApplications} from "@/contexts/applications-context"
 
 export default function EditApplicationPage() {
@@ -32,12 +29,6 @@ export default function EditApplicationPage() {
     return (
         <DashboardShell>
             <div className="flex items-center">
-                <Button variant="ghost" size="sm" className="mr-2" asChild>
-                    <Link href={`/applications/${id}`}>
-                        <ArrowLeft className="h-4 w-4 mr-1"/>
-                        Back
-                    </Link>
-                </Button>
                 <DashboardHeader
                     heading={`Edit Application: ${application.company}`}
                     text="Update your job application details."

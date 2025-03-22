@@ -10,7 +10,7 @@ interface ApplicationsOverviewProps {
 
 export function ApplicationsOverview({className}: ApplicationsOverviewProps) {
     return (
-        <Card className={cn("col-span-4", className)}>
+        <Card className={cn("w-full", className)}>
             <CardHeader>
                 <CardTitle>Applications Overview</CardTitle>
                 <CardDescription>Your application status distribution</CardDescription>

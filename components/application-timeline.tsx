@@ -6,6 +6,7 @@ import {Button} from "@/components/ui/button"
 import {Plus} from "lucide-react"
 import {ApplicationTimelineEvent} from "@/components/application-timeline-event"
 import {ApplicationTimelineForm} from "@/components/application-timeline-form"
+import {format} from "date-fns"
 
 type ApplicationTimelineProps = {}
 
@@ -40,7 +41,9 @@ export function ApplicationTimeline() {
     const addEvent = (event: any) => {
         const newEvent = {
             id: Date.now().toString(),
-            ...event,
+            date: event.date ? format(event.date, "yyyy-MM-dd") : format(new Date(), "yyyy-MM-dd"),
+            type: event.type,
+            notes: event.notes || "",
         }
         setEvents([...events, newEvent])
         setShowForm(false)

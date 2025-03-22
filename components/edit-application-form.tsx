@@ -83,15 +83,9 @@ export function EditApplicationForm({application}: EditApplicationFormProps) {
             dateApplied: formattedDate,
         })
 
-        // Show success toast
-        toast({
-            title: "Application updated",
-            description: "Your job application has been successfully updated.",
-        })
-
-        // Redirect to application details page
+        // Redirect to applications table instead of detail view
         setTimeout(() => {
-            router.push(`/applications/${application.id}`)
+            router.push("/applications")
             setIsSubmitting(false)
         }, 500)
     }
@@ -391,12 +385,8 @@ export function EditApplicationForm({application}: EditApplicationFormProps) {
                 </div>
 
                 <div className="flex justify-end space-x-4">
-                    <Button
-                        variant="outline"
-                        type="button"
-                        onClick={() => router.push(`/applications/${application.id}`)}
-                        disabled={isSubmitting}
-                    >
+                    <Button variant="outline" type="button" onClick={() => router.push("/applications")}
+                            disabled={isSubmitting}>
                         Cancel
                     </Button>
                     <Button type="submit" disabled={isSubmitting}>

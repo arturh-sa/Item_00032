@@ -10,8 +10,13 @@ import {
     DialogTrigger,
 } from "@/components/ui/dialog"
 import {statusVariantMap} from "@/lib/utils"
+import {cn} from "@/lib/utils"
 
-export function RecentApplications() {
+interface RecentApplicationsProps {
+    className?: string
+}
+
+export function RecentApplications({className}: RecentApplicationsProps) {
     const applications = [
         {
             id: "1",
@@ -52,7 +57,7 @@ export function RecentApplications() {
     ]
 
     return (
-        <Card>
+        <Card className={cn("w-full", className)}>
             <CardHeader>
                 <CardTitle>Recent Applications</CardTitle>
                 <CardDescription>Your most recent job applications</CardDescription>
